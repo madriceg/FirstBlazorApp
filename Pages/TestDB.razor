@@ -1,0 +1,51 @@
+﻿@page "/testDB"
+@using global::MyBlog.Data;
+@using global::MyBlog.Data.Models;
+@*@using MyBlog*@
+@*@using MyBlog.Data.Models*@ 
+@*@inject IMyBlogApi api*@
+@inject MyBlogApiServerSide api
+<h3>DBTest</h3>
+
+<button @onclick="CreateCategory">Create Category</button>
+<button @onclick="DeleteCategoty">Delete Category</button>
+<ul>
+    @foreach(var c in categories)
+    {
+        <li>@c.Name, @c.BlogPosts, @c.Id</li>
+    }
+</ul>
+
+
+@code {
+    public async Task CreateCategory()
+    {
+        Category category = new Category();
+        category.Name = "Test";
+        //category.Id = 0;
+
+        var cat = await api.SaveCategoryAsync(category);
+
+       
+        OnInitializedAsync();
+    }
+
+    public async Task DeleteCategoty()
+    {
+        var cat = (await api.GetCategoriesAsync()).FirstOrDefault();
+        if (cat != null)
+        {
+            await api.DeleteCategoryAsync(cat);
+        }
+        OnInitializedAsync();
+    }
+
+    protected List<Category> categories = new List<Category>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await api.GetCategoriesAsync();
+
+        await base.OnInitializedAsync();
+    }
+}

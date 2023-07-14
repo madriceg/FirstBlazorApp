@@ -1,0 +1,38 @@
+﻿@page "/StreamImage"
+@using System.Text.Json;
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+
+<h1>Stream Image Data Example</h1>
+
+<p>
+    <img id="image" />
+</p>
+
+<button @onclick="SetImageAsync">
+    Set Image
+</button>
+
+@code {
+
+
+    private async Task<Stream> GetImageStreamAsync()
+    {
+        return await Http.GetStreamAsync(
+            "https://avatars.githubusercontent.com/u/9141961");
+
+        return await Http.GetStreamAsync(
+        "https://api.usaspending.gov/api/v2/disaster/agency/count/");
+
+
+    }
+    
+
+    private async Task SetImageAsync()
+    {
+        var imageStream = await GetImageStreamAsync();
+        var dotnetImageStream = new DotNetStreamReference(imageStream);
+        await JS.InvokeVoidAsync("setImage", "image", dotnetImageStream);
+    }
+}

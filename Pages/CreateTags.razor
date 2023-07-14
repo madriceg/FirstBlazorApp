@@ -1,0 +1,46 @@
+﻿@page "/createtags"
+@using global::MyBlog.Data;
+@using global::MyBlog.Data.Models;
+@inject MyBlogApiServerSide api
+
+<h3>Create Tags</h3>
+
+<button @onclick="CreateTag">Create Tag</button>
+<button @onclick="DeleteTag">Delete Tag</button>
+<ul>
+    @foreach (var c in tags)
+    {
+        <li>@c.Name, @c.Id, @c.BlogPosts</li>
+    }
+</ul>
+
+
+@code {
+    public async Task CreateTag()
+    {
+        Tag tag = new Tag();
+        tag.Name = "Tagger";
+        //blogPost.Id = blogPost.Category.Id;
+        var cat = await api.SaveTagAsync(tag);
+        await OnInitializedAsync();
+    }
+
+    public async Task DeleteTag()
+    {
+        var cat = (await api.GetTagsAsync()).FirstOrDefault();
+        if (cat != null)
+        {
+            await api.DeleteTagAsync(cat);
+        }
+        await OnInitializedAsync();
+    }
+
+    protected List<Tag> tags = new List<Tag>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        tags = await api.GetTagsAsync();
+
+        await base.OnInitializedAsync();
+    }
+}

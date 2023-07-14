@@ -1,0 +1,55 @@
+﻿@page "/myblog"
+@using global::MyBlog.Data;
+@using global::MyBlog.Data.Models;
+@inject MyBlogApiServerSide api
+
+
+<h3>MyBlog</h3>
+
+<button @onclick="CreateCategory">Create BlogPost</button>
+<button @onclick="DeleteCategoty">Delete BlogPost</button>
+<ul>
+    @foreach (var c in blogPosts)
+    {
+        <li>@c.Title, @c.Text, @c.Id</li>
+    }
+</ul>
+
+
+@code {
+    public async Task CreateCategory()
+    {
+        Category category = new Category();
+        category.Name = "Test";
+        category.Id = 72;
+
+        BlogPost blogPost = new BlogPost();
+        blogPost.Title = "Test";
+        blogPost.PublishDate = DateTime.Now;
+        blogPost.Text = "Made it now!";
+       // blogPost.Id = 0;
+        blogPost.Category = category;
+       // blogPost.Id = blogPost.Category.Id;
+        var cat = await api.SaveBlogPostAsync(blogPost);
+        await OnInitializedAsync();
+    }
+
+    public async Task DeleteCategoty()
+    {
+        var cat = (await api.GetCategoriesAsync()).FirstOrDefault();
+        if (cat != null)
+        {
+            await api.DeleteCategoryAsync(cat);
+        }
+        await OnInitializedAsync();
+    }
+
+    protected List<BlogPost> blogPosts = new List<BlogPost>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        blogPosts = await api.GetBlogPostsAsync(10, 0);
+
+        await base.OnInitializedAsync();
+    }
+}

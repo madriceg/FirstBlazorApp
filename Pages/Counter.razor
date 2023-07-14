@@ -1,0 +1,67 @@
+﻿@page "/counter"
+@page "/counter/{startingValue:int}"
+
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+@if (isConnected)//currentCount.HasValue)
+{
+    <p role="status">Current count: @currentCount</p>
+    <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+}
+else
+{
+    <p>Loading...</p>
+}
+
+@code {
+    private bool isConnected;
+    private int? currentCount = 0;
+
+    //passed in starting value
+    [Parameter]
+    public int startingValue { get; set; } = 0;
+
+    [Parameter]
+    public int IncrementBy { get; set; } = 1;
+
+    protected override void OnParametersSet()
+    {
+        currentCount = startingValue;
+        base.OnParametersSet();
+    }
+
+    //private void IncrementCount()
+    //{
+    //    currentCount+=IncrementBy;
+    //}
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            isConnected = true;
+            await LoadStateAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadStateAsync()
+    {
+        var result = await ProtectedSessionStore.GetAsync<int>("count");
+        currentCount = result.Success ? result.Value : 0;
+    }
+
+    private async Task IncrementCount()
+    {
+        currentCount++;
+        await ProtectedSessionStore.SetAsync("count", currentCount);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await ProtectedSessionStore.GetAsync<int>("count");
+        currentCount = result.Success ? result.Value : 0;
+    }
+}
